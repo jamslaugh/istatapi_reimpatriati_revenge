@@ -4,8 +4,8 @@
 __all__ = ['RESOURCE', 'get_data', 'make_url_key']
 
 # %% ../nbs/03_retrieval.ipynb 1
-from .discovery import DataSet
-from .base import ISTAT
+from istatapi.discovery import DataSet
+from istatapi.connections import ISTAT
 import pandas as pd
 import io
 
@@ -14,7 +14,7 @@ RESOURCE = "data"
 # TODO: accept json response as well (?)
 
 
-def get_data(dataset: DataSet, **kwargs):
+def get_data(dataset: DataSet, **read_csv_kwargs):
     "returns a dataframe of the filitered 'dataset'"
     flowRef = dataset.identifiers["df_id"]
     filters = dataset.filters
@@ -23,7 +23,7 @@ def get_data(dataset: DataSet, **kwargs):
     path = "/".join(path_parts)
     request = ISTAT()
     response = request._request(path, headers={"Accept": "text/csv"})
-    df = pd.read_csv(io.StringIO(response.text))
+    df = pd.read_csv(io.StringIO(response.text), **read_csv_kwargs)
 
     if "TIME_PERIOD" in df.columns:
         df["TIME_PERIOD"] = pd.to_datetime(

@@ -1,0 +1,1 @@
+from istatapi.connections.base import ISTAT

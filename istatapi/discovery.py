@@ -4,8 +4,8 @@
 __all__ = ['parse_dataflows', 'all_available', 'search_dataset', 'DataSet']
 
 # %% ../nbs/01_discovery.ipynb 1
-from .base import ISTAT
-from .utils import make_tree, strip_ns
+from istatapi.connections import ISTAT
+from istatapi.utils import make_tree, strip_ns
 import pandas as pd
 from dataclasses import dataclass
 
