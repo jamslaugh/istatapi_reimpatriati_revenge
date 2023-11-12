@@ -4,18 +4,18 @@
 __all__ = ['RESOURCE', 'get_data', 'make_url_key']
 
 # %% ../nbs/03_retrieval.ipynb 1
-from istatapi.discovery import DataSet
+from istatapi.connections.discovery import DataSet
 from istatapi.connections import ISTAT
-import pandas as pd
 import io
+import os
 
 # %% ../nbs/03_retrieval.ipynb 4
 RESOURCE = "data"
 # TODO: accept json response as well (?)
 
 
-def get_data(dataset: DataSet, **read_csv_kwargs):
-    "returns a dataframe of the filitered 'dataset'"
+def get_data(dataset: DataSet, save_text=False, data_dir = "data_dir"):
+    "returns a dataframe of the filitered 'dataset' or a series of files saved in tmp folder data_dir"
     flowRef = dataset.identifiers["df_id"]
     filters = dataset.filters
     key = make_url_key(filters)
@@ -23,16 +23,19 @@ def get_data(dataset: DataSet, **read_csv_kwargs):
     path = "/".join(path_parts)
     request = ISTAT()
     response = request._request(path, headers={"Accept": "text/csv"})
-    df = pd.read_csv(io.StringIO(response.text), **read_csv_kwargs)
+    if not save_text:
+        return response
+    else:
+        try:
+            if not os.path.exists(data_dir):
+                os.mkdir(data_dir)
+            with open(f"{os.path.join(data_dir,flowRef)}.csv","wb") as f:
+                for chunk in response.iter_content(1000):
+                    f.write(chunk)
 
-    if "TIME_PERIOD" in df.columns:
-        df["TIME_PERIOD"] = pd.to_datetime(
-            df["TIME_PERIOD"].astype(str), infer_datetime_format=True
-        )
-        df = df.sort_values(by=["TIME_PERIOD"])
-
-    return df
-
+            return {"saved_path": f"{os.path.append(data_dir,flowRef)}.csv", "operation_done":"Ok"}
+        except Exception as e:
+            return {"saved_path": "null", "operation_done": "Ko", "exception": e}
 
 def make_url_key(filters: dict):
     key = ""
