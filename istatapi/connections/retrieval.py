@@ -14,7 +14,7 @@ RESOURCE = "data"
 # TODO: accept json response as well (?)
 
 
-def get_data(dataset: DataSet, save_text=False, data_dir = "data_dir"):
+def get_data(dataset: DataSet, save_text=False, data_dir = "data_dir", writer_chunk_size = None):
     "returns a dataframe of the filitered 'dataset' or a series of files saved in tmp folder data_dir"
     flowRef = dataset.identifiers["df_id"]
     filters = dataset.filters
@@ -30,7 +30,7 @@ def get_data(dataset: DataSet, save_text=False, data_dir = "data_dir"):
             if not os.path.exists(data_dir):
                 os.mkdir(data_dir)
             with open(f"{os.path.join(data_dir,flowRef)}.csv","wb") as f:
-                for chunk in response.iter_content(1000):
+                for chunk in response.iter_content(writer_chunk_size if writer_chunk_size is not None else 1000):
                     f.write(chunk)
                 f.close()
 
