@@ -32,8 +32,9 @@ def get_data(dataset: DataSet, save_text=False, data_dir = "data_dir"):
             with open(f"{os.path.join(data_dir,flowRef)}.csv","wb") as f:
                 for chunk in response.iter_content(1000):
                     f.write(chunk)
+                f.close()
 
-            return {"saved_path": f"{os.path.append(data_dir,flowRef)}.csv", "operation_done":"Ok"}
+            return {"saved_path": f"{os.path.join(data_dir,flowRef)}.csv", "operation_done":"Ok"}
         except Exception as e:
             return {"saved_path": "null", "operation_done": "Ko", "exception": e}
 
